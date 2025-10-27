@@ -141,3 +141,14 @@ def get_thread_tokens(thread_id):
 
     usage = storage.get_token_usage(thread_id)
     return jsonify(usage)
+
+
+@api_bp.route("/threads/<thread_id>/databases", methods=["GET"])
+def get_thread_databases(thread_id):
+    """Get databases that have been used in this thread"""
+    thread = storage.get_thread(thread_id)
+    if not thread:
+        return jsonify({"error": "Thread not found"}), 404
+
+    databases = storage.get_used_databases(thread_id)
+    return jsonify({"databases": databases})

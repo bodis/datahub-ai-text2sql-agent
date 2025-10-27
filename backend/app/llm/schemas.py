@@ -1,5 +1,5 @@
 """Structured output schemas for LLM responses"""
-from typing import Literal, Optional, List
+from typing import Literal, Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -55,4 +55,53 @@ class DecisionResult(BaseModel):
     message: Optional[str] = Field(
         default=None,
         description="Message to send to user (for ask_clarification, answer_directly, or reject)"
+    )
+
+
+class SQLGenerationResult(BaseModel):
+    """Result of SQL generation for a plan step"""
+    sql: str = Field(description="The generated SQL query")
+    reasoning: str = Field(description="Explanation of what the SQL does and why it was written this way")
+    database: str = Field(description="The logical database name to execute this query against")
+
+
+class ErrorAnalysisResult(BaseModel):
+    """Analysis of a SQL execution error"""
+    is_recoverable: bool = Field(description="Whether the error can be fixed by modifying the SQL")
+    reasoning: str = Field(description="Explanation of the error and why it is or isn't recoverable")
+    suggested_sql: Optional[str] = Field(
+        default=None,
+        description="Corrected SQL query if error is recoverable, None otherwise"
+    )
+    error_type: Literal["syntax", "schema", "permission", "connection", "data", "other"] = Field(
+        description="Category of error: syntax (SQL syntax error), schema (table/column not found), permission (access denied), connection (database unavailable), data (constraint violation, type mismatch), other"
+    )
+
+
+class StepExecutionResult(BaseModel):
+    """Result of executing a single plan step"""
+    step_number: int = Field(description="The step number that was executed")
+    success: bool = Field(description="Whether the step executed successfully")
+    sql: Optional[str] = Field(default=None, description="The final SQL that was executed (after any corrections)")
+    result_data: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="The query results as a list of dictionaries (for CSV-like output)"
+    )
+    result_value: Optional[str] = Field(
+        default=None,
+        description="Single result value (for direct answers like counts, sums)"
+    )
+    error: Optional[str] = Field(default=None, description="Error message if execution failed")
+    attempts: int = Field(default=1, description="Number of SQL generation attempts made")
+
+
+class SummaryResult(BaseModel):
+    """Final summary that answers the user's question"""
+    answer: str = Field(description="The complete answer to the user's question in their language")
+    is_answerable: bool = Field(description="Whether the question could be answered with the available data")
+    confidence: Literal["high", "medium", "low"] = Field(
+        description="Confidence level in the answer based on data quality and completeness"
+    )
+    data_sources_used: List[str] = Field(
+        description="List of databases that were queried to answer the question"
     )

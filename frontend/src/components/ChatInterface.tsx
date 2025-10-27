@@ -42,7 +42,7 @@ export function ChatInterface({ threadId, messages, onSendMessage, isLoading = f
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             💬 Chat Interface
           </h1>
-          <DataSourceBadges />
+          <DataSourceBadges threadId={threadId} messageCount={messages.length} />
         </div>
         <TokenDisplay threadId={threadId} />
       </div>

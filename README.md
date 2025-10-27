@@ -2,15 +2,47 @@
 
 An intelligent chat application that converts natural language questions into SQL queries using Claude AI. Built with Flask (Python) and React (TypeScript).
 
+---
+
+## 📚 Documentation
+
+**⭐ Complete documentation is available in the `/docs` directory:**
+
+- **[Getting Started](./docs/guides/GETTING_STARTED.md)** - Quick setup guide
+- **[Complete Overview](./docs/README.md)** - Current state and features
+- **[System Architecture](./docs/architecture/SYSTEM_ARCHITECTURE.md)** - How it all works
+- **[Documentation Index](./docs/INDEX.md)** - Find anything
+
+---
+
+## 📸 Preview
+
+### Chat Interface
+
+![Chat Interface](docs/images/chat_history.png)
+
+*Natural language conversation with AI-powered query planning and database badge highlighting*
+
+### Detailed AI Working
+
+![AI Working Details](docs/images/detailed_ai_working.png)
+
+*Multi-stage LLM pipeline with token tracking, debug panel, and step-by-step execution*
+
+---
+
 ## Features
 
 - **AI-Powered Query Planning**: Multi-stage LLM orchestration converts natural language to SQL queries
-  - Three-stage pipeline: validation → decision making → query planning
-  - Multi-model support (Claude Haiku 4 for validation, Sonnet 4.5 for planning)
+  - Five-stage pipeline: validation → decision → planning → execution → summary
+  - Multi-model support (Claude Haiku 4 for validation, Sonnet 4.5 for planning/execution)
   - Structured outputs using Pydantic schemas
+  - Agentic SQL generation with automatic error recovery (up to 5 retries per step)
 - **Multi-Database Support**: Query across 6 different database schemas (customer, accounts, loans, insurance, compliance, employees)
 - **Token Tracking**: Real-time token usage tracking and display per conversation thread
+- **Database Usage Visualization**: Visual highlighting of which databases are used in each thread
 - **Thread Management**: Create and manage multiple chat threads
+- **Debug Panel**: Expandable panel showing all LLM interactions, token counts, and response times
 - **In-memory storage** with abstraction layer for easy migration to persistent databases
 - **Modern UI**: Clean interface with shadcn/ui components, data source badges, and debug panels
 - **Datasource Abstraction**: Support for PostgreSQL with extensible architecture for additional databases
@@ -225,25 +257,30 @@ npm install <package-name>
 
 ## Roadmap
 
-### Completed Features
-- ✅ LLM-powered query planning with multi-stage pipeline
+### Completed Features ✅
+- ✅ LLM-powered query planning with five-stage pipeline
 - ✅ Multi-model support (Haiku 4 + Sonnet 4.5)
-- ✅ Token tracking and display
-- ✅ Datasource abstraction layer
-- ✅ PostgreSQL connector implementation
+- ✅ **Agentic SQL execution with automatic error recovery**
+- ✅ **Multi-step query execution** - Complex queries across databases
+- ✅ **Result formatting** - Natural language summaries from query results
+- ✅ Token tracking and display per thread
+- ✅ **Database usage tracking** - Per-thread visualization
+- ✅ Datasource abstraction layer with PostgreSQL support
 - ✅ YAML-based configuration for schemas and prompts
 - ✅ Structured outputs with Pydantic
-- ✅ Debug logging for LLM interactions
+- ✅ Debug logging with full prompt/response visibility
+- ✅ **UI highlighting** - Dimmed/active database badges
+- ✅ **Error categorization** - Syntax, schema, connection, data errors
 
 ### Coming Soon
-- [ ] **SQL Execution Engine** - Execute generated SQL queries
-- [ ] **Result Formatting** - Display query results in tables/charts
-- [ ] **Query Optimization** - Optimize generated SQL for performance
-- [ ] **Multi-step Query Execution** - Execute complex multi-query plans
+- [ ] **Query result tables/charts** - Visual data presentation
+- [ ] **Query optimization** - Analyze and improve generated SQL
+- [ ] **Result caching** - Cache frequently used queries
 - [ ] Replace in-memory storage with persistent database
-- [ ] Add user authentication
+- [ ] Add user authentication and authorization
 - [ ] Query history and favorites
 - [ ] Export results (CSV, JSON, Excel)
+- [ ] Streaming responses (SSE)
 - [ ] Deploy to production
 
 ## License

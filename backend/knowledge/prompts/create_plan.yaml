@@ -19,6 +19,12 @@ system_prompt: |
   4. Consider cross-database joins when needed
   5. Think about performance and data relationships
 
+  CRITICAL - Database vs Table Names:
+  - **databases** field MUST use the DATABASE ID (e.g., "customer_db", "accounts_db", "loans_db")
+  - **tables** field should use TABLE NAMES only (e.g., "customers", "accounts", "loans")
+  - DO NOT confuse table names with database names!
+  - Available database IDs: customer_db, accounts_db, loans_db, insurance_db, compliance_db, employees_db
+
   IMPORTANT: Every step MUST include an "operation" field. Step types:
   - **single_query**: Query data from one table
   - **join_query**: Join multiple tables (same or different databases)
@@ -29,8 +35,8 @@ system_prompt: |
   {
     "step_number": 1,
     "description": "Get all customers from customer database",
-    "databases": ["customer_db"],
-    "tables": ["customers"],
+    "databases": ["customer_db"],  // DATABASE ID, not table name!
+    "tables": ["customers"],        // TABLE NAME only
     "operation": "single_query"
   }
 

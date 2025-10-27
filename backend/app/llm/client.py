@@ -102,10 +102,10 @@ class ClaudeClient:
             logger.info(f"LLM REQUEST - Model: {model_id}")
             logger.info(f"Temperature: {temperature}")
             if system_prompt:
-                logger.info(f"System Prompt:\n{system_prompt[:200]}...")
-            logger.info(f"Messages:")
-            for msg in formatted_messages:
-                logger.info(f"  {msg['role']}: {msg['content'][:200]}...")
+                logger.info(f"SYSTEM PROMPT (FULL):\n{system_prompt}")
+            logger.info(f"USER MESSAGES (FULL):")
+            for i, msg in enumerate(formatted_messages):
+                logger.info(f"  Message {i+1} [{msg['role']}]:\n{msg['content']}")
             logger.info("=" * 80)
 
         start_time = time.time()
@@ -131,7 +131,7 @@ class ClaudeClient:
             logger.info(f"LLM RESPONSE - Model: {model_id}")
             logger.info(f"Elapsed Time: {elapsed_time:.2f}s ({usage['elapsed_time_ms']}ms)")
             logger.info(f"Token Usage: Input={usage['input_tokens']}, Output={usage['output_tokens']}, Total={usage['total_tokens']}")
-            logger.info(f"Response:\n{response_text[:500]}...")
+            logger.info(f"RESPONSE TEXT (FULL):\n{response_text}")
             logger.info("=" * 80)
 
         return response_text, usage
@@ -184,10 +184,10 @@ class ClaudeClient:
             logger.info(f"Response Model: {response_model.__name__}")
             logger.info(f"Temperature: {temperature}")
             if system_prompt:
-                logger.info(f"System Prompt:\n{system_prompt[:200]}...")
-            logger.info(f"Messages:")
-            for msg in formatted_messages:
-                logger.info(f"  {msg['role']}: {msg['content'][:200]}...")
+                logger.info(f"SYSTEM PROMPT (FULL):\n{system_prompt}")
+            logger.info(f"USER MESSAGES (FULL):")
+            for i, msg in enumerate(formatted_messages):
+                logger.info(f"  Message {i+1} [{msg['role']}]:\n{msg['content']}")
             logger.info("=" * 80)
 
         start_time = time.time()
@@ -246,7 +246,7 @@ class ClaudeClient:
             logger.info(f"LLM STRUCTURED RESPONSE - Model: {model_id}")
             logger.info(f"Elapsed Time: {elapsed_time:.2f}s ({usage['elapsed_time_ms']}ms)")
             logger.info(f"Token Usage: Input={usage['input_tokens']}, Output={usage['output_tokens']}, Total={usage['total_tokens']}")
-            logger.info(f"Structured Response:\n{json.dumps(structured_response.model_dump(), indent=2)[:500]}...")
+            logger.info(f"STRUCTURED RESPONSE (FULL):\n{json.dumps(structured_response.model_dump(), indent=2)}")
             logger.info("=" * 80)
 
         return structured_response, usage

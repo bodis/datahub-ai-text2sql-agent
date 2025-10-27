@@ -6,6 +6,8 @@ from app.llm.client import get_client, ConversationMessage
 from app.llm.prompts import get_prompt_loader
 from app.llm.schemas import ValidationResult, DecisionResult, QueryPlan
 from app.datasources.manager import get_manager
+from app.llm.executor import get_executor
+from app.storage import storage
 
 
 class QueryOrchestrator:
@@ -49,6 +51,66 @@ class QueryOrchestrator:
 
         return "\n".join(lines)
 
+    def _load_database_schemas(self) -> Dict[str, Any]:
+        """Load all database schemas from YAML files"""
+        schemas = {}
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        schemas_dir = os.path.join(base_dir, "knowledge", "data_schemas")
+
+        schema_files = [
+            "customer_db.yaml",
+            "accounts_db.yaml",
+            "loans_db.yaml",
+            "insurance_db.yaml",
+            "compliance_db.yaml",
+            "employees_db.yaml"
+        ]
+
+        for filename in schema_files:
+            filepath = os.path.join(schemas_dir, filename)
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, "r") as f:
+                        schema_data = yaml.safe_load(f)
+                        for db_name, db_info in schema_data.get("databases", {}).items():
+                            schemas[db_name] = db_info
+                except Exception as e:
+                    import logging
+                    logging.error(f"Failed to load schema from {filename}: {e}")
+
+        return schemas
+
+    def _format_database_schemas(self, database_names: List[str]) -> str:
+        """Format schema information for specific databases"""
+        schemas = self._load_database_schemas()
+        lines = []
+
+        for db_name in database_names:
+            if db_name not in schemas:
+                lines.append(f"### {db_name}\n(Schema not available)\n")
+                continue
+
+            db_info = schemas[db_name]
+            lines.append(f"### Database: {db_name}\n")
+
+            # Format tables with their descriptions
+            for schema_name, schema_info in db_info.get("schemas", {}).items():
+                for table_name, table_info in schema_info.get("tables", {}).items():
+                    lines.append(f"\n**Table: {table_name}** (in {db_name}.{schema_name})")
+                    lines.append(f"Description: {table_info.get('description', 'N/A')}")
+
+                    # List key columns
+                    columns = table_info.get("columns", [])[:5]  # First 5 columns for planning
+                    if columns:
+                        lines.append("Key columns:")
+                        for col in columns:
+                            col_name = col.get("name")
+                            col_type = col.get("type")
+                            col_desc = col.get("description", "")
+                            lines.append(f"  - {col_name} ({col_type}): {col_desc}")
+
+        return "\n".join(lines)
+
     def process_question(
         self,
         question: str,
@@ -69,6 +131,15 @@ class QueryOrchestrator:
 
         # Stage 1: Validate question
         validation_result = self._validate_question(question, conversation_history)
+
+        # Track databases used in this thread (if relevant)
+        if validation_result.is_relevant and validation_result.relevant_databases and self.thread_id:
+            try:
+                storage.add_used_databases(self.thread_id, validation_result.relevant_databases)
+            except Exception as e:
+                # Don't fail the request if tracking fails
+                import logging
+                logging.warning(f"Failed to track used databases: {e}")
 
         if not validation_result.is_relevant:
             pipeline_time = time.time() - pipeline_start
@@ -163,19 +234,57 @@ class QueryOrchestrator:
                     }
                 }
 
-            # Return the plan (SQL execution would be added later)
-            plan_summary = self._format_plan_summary(plan)
+            # Stage 4: Execute plan with agentic SQL generation
+            executor = get_executor(self.thread_id)
+            executor.token_usage_callback = self.token_usage_callback  # Share token tracking
+
+            execution_results = executor.execute_plan(question, plan)
+
+            # Merge executor debug info
+            self.debug_info.extend(executor.debug_info)
+
+            # Check if execution failed
+            if not all(result.success for result in execution_results):
+                # Find first failed step
+                failed_step = next(r for r in execution_results if not r.success)
+                pipeline_time = time.time() - pipeline_start
+                # Update all debug info with pipeline time
+                for info in self.debug_info:
+                    info["pipeline_time_ms"] = int(pipeline_time * 1000)
+
+                return {
+                    "type": "execution_error",
+                    "message": f"Failed to execute step {failed_step.step_number}: {failed_step.error}",
+                    "metadata": {
+                        "validation": validation_result.model_dump(),
+                        "decision": decision.model_dump(),
+                        "plan": plan.model_dump(),
+                        "execution_results": [r.model_dump() for r in execution_results],
+                        "pipeline_time_ms": int(pipeline_time * 1000),
+                        "debug_info": self.debug_info
+                    }
+                }
+
+            # Stage 5: Generate summary from execution results
+            summary = executor.generate_summary(question, plan, execution_results)
+
+            # Merge final debug info
+            self.debug_info.extend(executor.debug_info[len(execution_results):])  # Only new debug info
+
             pipeline_time = time.time() - pipeline_start
             # Update all debug info with pipeline time
             for info in self.debug_info:
                 info["pipeline_time_ms"] = int(pipeline_time * 1000)
+
             return {
-                "type": "plan_created",
-                "message": plan_summary,
+                "type": "answer",
+                "message": summary.answer,
                 "metadata": {
                     "validation": validation_result.model_dump(),
                     "decision": decision.model_dump(),
                     "plan": plan.model_dump(),
+                    "execution_results": [r.model_dump() for r in execution_results],
+                    "summary": summary.model_dump(),
                     "pipeline_time_ms": int(pipeline_time * 1000),
                     "debug_info": self.debug_info
                 }
@@ -287,8 +396,8 @@ class QueryOrchestrator:
         """Stage 3: Create query execution plan"""
         template = self.prompt_loader.load("create_plan")
 
-        # Load relevant database schemas (simplified - would load full YAML in production)
-        database_schemas = f"Relevant databases: {', '.join(validation.relevant_databases)}"
+        # Load relevant database schemas with full table and column information
+        database_schemas = self._format_database_schemas(validation.relevant_databases)
 
         user_prompt = template.render_user_prompt(
             question=question,

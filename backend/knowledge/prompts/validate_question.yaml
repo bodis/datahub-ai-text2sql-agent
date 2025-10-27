@@ -22,6 +22,19 @@ system_prompt: |
   - Questions about other domains (sports, entertainment, etc.)
   - Questions that cannot be answered with the available databases
 
+  CRITICAL - Database ID Format:
+  When specifying relevant_databases, you MUST use the DATABASE ID (the value in parentheses above), NOT the database name or table names.
+
+  Valid database IDs (from the list above):
+  - customer_db (for customer-related data)
+  - accounts_db (for accounts and transactions)
+  - loans_db (for loans and lending)
+  - insurance_db (for insurance policies)
+  - compliance_db (for compliance and audits)
+  - employees_db (for HR and employees)
+
+  Example: If the question is about customers, use ["customer_db"], NOT ["customers"] or ["Customer DB"].
+
   If the question is not relevant, politely explain that you can only help with queries about the financial and banking data you have access to.
 
 user_prompt: |
@@ -32,8 +45,10 @@ user_prompt: |
 
   Based on the available data sources and the user's question, determine:
   1. Is this question relevant to the available databases?
-  2. If yes, which databases would be needed to answer it?
+  2. If yes, which DATABASE IDs (from the list above) would be needed to answer it? Use the ID values like "customer_db", "accounts_db", etc.
   3. If no, what should I tell the user?
+
+  Remember: Use database IDs (e.g., "customer_db"), not table names (e.g., "customers")!
 
 structured_output: ValidationResult
 temperature: 0.3

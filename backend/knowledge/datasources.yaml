@@ -1,27 +1,100 @@
 # Data Source Configuration
 # Defines the physical data sources and their connection details
+# Each logical database has its own physical PostgreSQL database
 
 datasources:
-  demo_bank:
+  customer_db_source:
     type: postgresql
-    description: Demo bank PostgreSQL database containing all banking schemas
+    description: Customer DB PostgreSQL database
     enabled: true
     connection:
-      # Connection details from environment variables
       host: "${POSTGRES_HOST:localhost}"
       port: "${POSTGRES_PORT:5432}"
-      database: "${POSTGRES_DB:accounts_db}"
+      database: "${POSTGRES_CUSTOMER_DB:customer_db}"
       user: "${POSTGRES_USER:postgres}"
       password: "${POSTGRES_PASSWORD:postgres}"
-      # Connection pool settings
       min_pool_size: 2
       max_pool_size: 10
       connect_timeout: 10
-    # Schemas/databases available in this datasource
     databases:
       - customer_db
+
+  accounts_db_source:
+    type: postgresql
+    description: Accounts DB PostgreSQL database
+    enabled: true
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_ACCOUNTS_DB:accounts_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    databases:
       - accounts_db
+
+  loans_db_source:
+    type: postgresql
+    description: Loans DB PostgreSQL database
+    enabled: true
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_LOANS_DB:loans_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    databases:
       - loans_db
+
+  insurance_db_source:
+    type: postgresql
+    description: Insurance DB PostgreSQL database
+    enabled: true
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_INSURANCE_DB:insurance_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    databases:
       - insurance_db
+
+  compliance_db_source:
+    type: postgresql
+    description: Compliance DB PostgreSQL database
+    enabled: true
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_COMPLIANCE_DB:compliance_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    databases:
       - compliance_db
+
+  employees_db_source:
+    type: postgresql
+    description: Employees DB PostgreSQL database
+    enabled: true
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_EMPLOYEES_DB:employees_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    databases:
       - employees_db

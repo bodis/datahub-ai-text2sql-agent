@@ -42,6 +42,16 @@ class StorageInterface(ABC):
         """Get total token usage for a thread"""
         pass
 
+    @abstractmethod
+    def add_used_databases(self, thread_id: str, databases: List[str]) -> None:
+        """Add databases that were used in this thread"""
+        pass
+
+    @abstractmethod
+    def get_used_databases(self, thread_id: str) -> List[str]:
+        """Get all databases that have been used in this thread"""
+        pass
+
 
 class InMemoryStorage(StorageInterface):
     """In-memory implementation of storage interface"""
@@ -50,6 +60,7 @@ class InMemoryStorage(StorageInterface):
         self.threads: Dict[str, Dict] = {}
         self.messages: Dict[str, List[Dict]] = {}
         self.token_usage: Dict[str, Dict] = {}  # thread_id -> usage stats
+        self.used_databases: Dict[str, set] = {}  # thread_id -> set of database IDs
 
     def create_thread(self, name: str) -> Dict:
         thread_id = str(uuid.uuid4())
@@ -66,6 +77,7 @@ class InMemoryStorage(StorageInterface):
             "total_tokens": 0,
             "calls": 0
         }
+        self.used_databases[thread_id] = set()
         return thread
 
     def get_thread(self, thread_id: str) -> Optional[Dict]:
@@ -126,6 +138,22 @@ class InMemoryStorage(StorageInterface):
             "total_tokens": 0,
             "calls": 0
         })
+
+    def add_used_databases(self, thread_id: str, databases: List[str]) -> None:
+        """Add databases that were used in this thread"""
+        if thread_id not in self.threads:
+            raise ValueError(f"Thread {thread_id} not found")
+
+        if thread_id not in self.used_databases:
+            self.used_databases[thread_id] = set()
+
+        # Add databases to the set (automatically handles duplicates)
+        for db in databases:
+            self.used_databases[thread_id].add(db)
+
+    def get_used_databases(self, thread_id: str) -> List[str]:
+        """Get all databases that have been used in this thread"""
+        return sorted(list(self.used_databases.get(thread_id, set())))
 
 
 # Global storage instance
