@@ -1,0 +1,27 @@
+# Data Source Configuration
+# Defines the physical data sources and their connection details
+
+datasources:
+  demo_bank:
+    type: postgresql
+    description: Demo bank PostgreSQL database containing all banking schemas
+    enabled: true
+    connection:
+      # Connection details from environment variables
+      host: "${POSTGRES_HOST:localhost}"
+      port: "${POSTGRES_PORT:5432}"
+      database: "${POSTGRES_DB:accounts_db}"
+      user: "${POSTGRES_USER:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+      # Connection pool settings
+      min_pool_size: 2
+      max_pool_size: 10
+      connect_timeout: 10
+    # Schemas/databases available in this datasource
+    databases:
+      - customer_db
+      - accounts_db
+      - loans_db
+      - insurance_db
+      - compliance_db
+      - employees_db

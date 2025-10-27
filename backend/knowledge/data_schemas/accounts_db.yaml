@@ -1,0 +1,179 @@
+
+databases:
+  accounts_db:
+    schemas:
+      public:
+        tables:
+          account_relationships:
+            description: Relationships between accounts such as joint ownership
+            columns:
+            - name: relationship_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing identifier for the relationship
+            - name: primary_account_id
+              type: VARCHAR(50)
+              nullable: false
+              description: The main account in the relationship
+              foreign_key:
+                table: accounts_db.public.accounts
+                column: account_id
+            - name: related_account_id
+              type: VARCHAR(50)
+              nullable: false
+              description: The related or secondary account
+              foreign_key:
+                table: accounts_db.public.accounts
+                column: account_id
+            - name: relationship_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: joint_owner, beneficiary, authorized_user'
+              sample_values:
+              - joint_owner
+              - authorized_user
+              - authorized_user
+              - beneficiary
+            - name: created_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When the relationship was established
+          accounts:
+            description: Bank accounts owned by customers
+            columns:
+            - name: account_id
+              type: VARCHAR(50)
+              nullable: false
+              description: System-generated unique identifier for the account
+            - name: account_number
+              type: VARCHAR(20)
+              nullable: false
+              description: Customer-facing account number displayed on statements
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Reference to the customer who owns this account
+              foreign_key:
+                table: accounts_db.public.customers
+                column: customer_id
+            - name: account_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type of account: savings, checking, money_market'
+              sample_values:
+              - savings
+              - cd
+              - checking
+              - savings
+            - name: account_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Current operational status: active, frozen, closed'
+              sample_values:
+              - active
+              - active
+              - closed
+              - active
+            - name: balance
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Current account balance in account currency
+            - name: currency
+              type: VARCHAR(3)
+              nullable: true
+              description: ISO currency code for the account
+              sample_values:
+              - USD
+              - USD
+              - CAD
+              - USD
+            - name: opened_date
+              type: DATE
+              nullable: false
+              description: Date when the account was officially opened
+            - name: closed_date
+              type: DATE
+              nullable: true
+              description: Date when the account was closed, NULL if still active
+            - name: branch_code
+              type: VARCHAR(10)
+              nullable: true
+              description: Code of the branch where account was opened
+          customers:
+            description: Core customer master data for account holders
+            columns:
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique identifier for customer across all banking systems
+            - name: first_name
+              type: VARCHAR(100)
+              nullable: false
+              description: Customer first name as per official documents
+            - name: last_name
+              type: VARCHAR(100)
+              nullable: false
+              description: Customer last name as per official documents
+            - name: date_of_birth
+              type: DATE
+              nullable: true
+              description: Customer date of birth for age verification and compliance
+            - name: email
+              type: VARCHAR(150)
+              nullable: true
+              description: Primary email address for customer communication
+            - name: phone
+              type: VARCHAR(20)
+              nullable: true
+              description: Primary phone number for customer contact
+            - name: created_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Timestamp when customer record was created in the system
+          transactions:
+            description: Financial transactions on accounts
+            columns:
+            - name: transaction_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique identifier for each transaction
+            - name: account_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Reference to the account involved in the transaction
+              foreign_key:
+                table: accounts_db.public.accounts
+                column: account_id
+            - name: transaction_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: deposit, withdrawal, transfer, payment, fee'
+              sample_values:
+              - withdrawal
+              - withdrawal
+              - payment
+              - salary
+            - name: transaction_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Monetary amount of the transaction, positive for credits
+            - name: transaction_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Timestamp when transaction was processed
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Human-readable description or memo for the transaction
+            - name: balance_after
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Account balance after this transaction was applied
+            - name: counterparty_account
+              type: VARCHAR(20)
+              nullable: true
+              description: Account number of the other party in transfers
+            - name: processed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID who processed the transaction, NULL for automated

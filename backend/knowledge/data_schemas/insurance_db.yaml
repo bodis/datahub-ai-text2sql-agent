@@ -1,0 +1,206 @@
+
+databases:
+  insurance_db:
+    schemas:
+      public:
+        tables:
+          beneficiaries:
+            description: Policy beneficiaries who receive benefits
+            columns:
+            - name: beneficiary_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing beneficiary identifier
+            - name: policy_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Policy to which beneficiary is linked
+              foreign_key:
+                table: insurance_db.public.policies
+                column: policy_id
+            - name: beneficiary_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Full name of the beneficiary
+            - name: relationship
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Relationship to policyholder: spouse, child, parent'
+            - name: percentage
+              type: INTEGER
+              nullable: true
+              description: Percentage of benefit allocated to this beneficiary
+            - name: contact_info
+              type: TEXT
+              nullable: true
+              description: Contact information for the beneficiary
+          claims:
+            description: Insurance claims filed by policyholders
+            columns:
+            - name: claim_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique claim identifier
+            - name: policy_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Policy under which claim is filed
+              foreign_key:
+                table: insurance_db.public.policies
+                column: policy_id
+            - name: claim_number
+              type: VARCHAR(30)
+              nullable: false
+              description: Customer-facing claim reference number
+            - name: claim_type
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Type: death, accident, property_damage, medical'
+            - name: claim_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Total amount claimed
+            - name: claim_date
+              type: DATE
+              nullable: false
+              description: Date when claim was filed
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: submitted, under_review, approved, rejected, paid'
+            - name: approved_amount
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Amount approved for payment, may differ from claim_amount
+            - name: settlement_date
+              type: DATE
+              nullable: true
+              description: Date when claim was paid
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Detailed description of the claim
+            - name: processed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who processed the claim
+          policies:
+            description: Insurance policies sold to customers
+            columns:
+            - name: policy_id
+              type: VARCHAR(50)
+              nullable: false
+              description: System-generated unique policy identifier
+            - name: policy_number
+              type: VARCHAR(30)
+              nullable: false
+              description: Customer-facing policy number
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer who owns the policy
+            - name: policy_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: life, property, vehicle, health, travel'
+            - name: policy_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Status: active, lapsed, cancelled, matured'
+            - name: coverage_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Maximum benefit payable under policy
+            - name: premium_amount
+              type: NUMERIC(10, 2)
+              nullable: false
+              description: Regular premium payment amount
+            - name: premium_frequency
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Payment frequency: monthly, quarterly, annual'
+            - name: start_date
+              type: DATE
+              nullable: false
+              description: Policy coverage start date
+            - name: end_date
+              type: DATE
+              nullable: true
+              description: Policy expiration or maturity date
+            - name: linked_account_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Bank account used for premium payments
+            - name: agent_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who sold the policy
+            - name: created_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Record creation timestamp
+          policy_events:
+            description: Lifecycle events for insurance policies
+            columns:
+            - name: event_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing event identifier
+            - name: policy_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Policy associated with the event
+              foreign_key:
+                table: insurance_db.public.policies
+                column: policy_id
+            - name: event_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: renewal, modification, cancellation, reinstatement'
+            - name: event_date
+              type: DATE
+              nullable: false
+              description: Date the event occurred
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Details about the event
+            - name: performed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who performed the action
+          premium_payments:
+            description: Premium payment transactions for policies
+            columns:
+            - name: payment_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique payment identifier
+            - name: policy_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Policy for which premium was paid
+              foreign_key:
+                table: insurance_db.public.policies
+                column: policy_id
+            - name: payment_date
+              type: DATE
+              nullable: false
+              description: Date premium was received
+            - name: amount
+              type: NUMERIC(10, 2)
+              nullable: false
+              description: Premium amount paid
+            - name: payment_method
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Method: auto_debit, check, wire_transfer, online'
+            - name: from_account_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Bank account from which payment was made
+            - name: payment_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Status: completed, pending, failed, reversed'
+

@@ -83,6 +83,7 @@ function App() {
       />
       {selectedThreadId ? (
         <ChatInterface
+          threadId={selectedThreadId}
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={sendingMessage}

@@ -3,14 +3,18 @@ import { Message } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PaperPlaneIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { DataSourceBadges } from "./DataSourceBadges";
+import { TokenDisplay } from "./TokenDisplay";
+import { DebugPanel } from "./DebugPanel";
 
 interface ChatInterfaceProps {
+  threadId: string;
   messages: Message[];
   onSendMessage: (content: string) => Promise<void>;
   isLoading?: boolean;
 }
 
-export function ChatInterface({ messages, onSendMessage, isLoading = false }: ChatInterfaceProps) {
+export function ChatInterface({ threadId, messages, onSendMessage, isLoading = false }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +38,13 @@ export function ChatInterface({ messages, onSendMessage, isLoading = false }: Ch
   return (
     <div className="flex-1 flex flex-col h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       <div className="border-b bg-white/70 backdrop-blur-sm px-6 py-4">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          💬 Chat Interface
-        </h1>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            💬 Chat Interface
+          </h1>
+          <DataSourceBadges />
+        </div>
+        <TokenDisplay threadId={threadId} />
       </div>
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 ? (
@@ -69,10 +77,15 @@ export function ChatInterface({ messages, onSendMessage, isLoading = false }: Ch
                 <p className="text-xs font-semibold mb-2 opacity-80">
                   {message.sender === "user" ? "You" : "🤖 Server"}
                 </p>
-                <p className="text-sm leading-relaxed">{message.content}</p>
-                <p className="text-xs mt-2 opacity-60">
-                  {new Date(message.created_at).toLocaleTimeString()}
-                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs opacity-60">
+                    {new Date(message.created_at).toLocaleTimeString()}
+                  </p>
+                  {message.debug_info && message.debug_info.length > 0 && (
+                    <DebugPanel debugInfo={message.debug_info} />
+                  )}
+                </div>
               </div>
             </div>
           ))

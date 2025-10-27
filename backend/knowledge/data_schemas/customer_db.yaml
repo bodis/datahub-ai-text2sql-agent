@@ -1,0 +1,346 @@
+
+databases:
+  customer_db:
+    schemas:
+      public:
+        tables:
+          campaign_responses:
+            description: Customer responses to marketing campaigns
+            columns:
+            - name: response_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing response identifier
+            - name: campaign_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Campaign that generated the response
+              foreign_key:
+                table: customer_db.public.campaigns
+                column: campaign_id
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer who responded
+              foreign_key:
+                table: customer_db.public.customer_profiles
+                column: customer_id
+            - name: response_date
+              type: DATE
+              nullable: true
+              description: When customer responded
+            - name: response_type
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Type: clicked, opened, unsubscribed, purchased'
+              sample_values:
+              - unsubscribed
+              - opened
+              - purchased
+              - unsubscribed
+            - name: converted
+              type: BOOLEAN
+              nullable: true
+              description: Whether response resulted in conversion
+              sample_values:
+              - 'False'
+              - 'False'
+              - 'False'
+              - 'False'
+          campaigns:
+            description: Marketing campaigns targeting customers
+            columns:
+            - name: campaign_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique campaign identifier
+            - name: campaign_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Descriptive name of the marketing campaign
+            - name: campaign_type
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Type: email, direct_mail, digital, cross_sell'
+              sample_values:
+              - cross_sell
+              - cross_sell
+              - digital
+              - email
+            - name: start_date
+              type: DATE
+              nullable: true
+              description: Campaign start date
+            - name: end_date
+              type: DATE
+              nullable: true
+              description: Campaign end date
+            - name: target_segment
+              type: VARCHAR(50)
+              nullable: true
+              description: Customer segment targeted by campaign
+              sample_values:
+              - corporate
+              - all
+              - corporate
+              - all
+          complaints:
+            description: Customer complaints and their resolution tracking
+            columns:
+            - name: complaint_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique complaint identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer who filed the complaint
+              foreign_key:
+                table: customer_db.public.customer_profiles
+                column: customer_id
+            - name: complaint_type
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Category: service, fee, product, fraud, other'
+              sample_values:
+              - product
+              - product
+              - other
+              - other
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Detailed description of the complaint
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Current status: open, investigating, resolved, closed'
+              sample_values:
+              - resolved
+              - investigating
+              - closed
+              - resolved
+            - name: priority
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Priority level: low, medium, high, critical'
+              sample_values:
+              - low
+              - medium
+              - critical
+              - medium
+            - name: filed_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When complaint was filed
+            - name: resolved_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When complaint was resolved, NULL if still open
+            - name: resolution_time_hours
+              type: INTEGER
+              nullable: true
+              description: Time taken to resolve in hours
+            - name: assigned_to
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID responsible for resolution
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to employee assigned to resolve complaint
+          customer_profiles:
+            description: Customer relationship management profiles
+            columns:
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique customer identifier matching across all systems
+            - name: full_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Complete name of the customer
+            - name: email
+              type: VARCHAR(150)
+              nullable: true
+              description: Primary email for communications and alerts
+            - name: phone
+              type: VARCHAR(20)
+              nullable: true
+              description: Primary contact phone number
+            - name: address
+              type: TEXT
+              nullable: true
+              description: Full residential address
+            - name: city
+              type: VARCHAR(100)
+              nullable: true
+              description: City of residence
+            - name: country
+              type: VARCHAR(100)
+              nullable: true
+              description: Country of residence
+              sample_values:
+              - USA
+              - USA
+              - USA
+              - USA
+            - name: customer_segment
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Classification: retail, premium, corporate, private_banking'
+              sample_values:
+              - corporate
+              - retail
+              - retail
+              - retail
+            - name: customer_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Lifecycle status: active, dormant, closed'
+              sample_values:
+              - active
+              - active
+              - active
+              - active
+            - name: onboarding_date
+              type: DATE
+              nullable: false
+              description: Date when customer relationship was established
+            - name: assigned_agent_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID of the assigned relationship manager
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to relationship manager employee record
+            - name: kyc_status
+              type: VARCHAR(20)
+              nullable: true
+              description: Know Your Customer verification status
+              sample_values:
+              - verified
+              - verified
+              - verified
+              - verified
+            - name: risk_rating
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Overall customer risk level: low, medium, high'
+              sample_values:
+              - low
+              - low
+              - medium
+              - low
+            - name: created_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Record creation timestamp
+            - name: updated_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Last update timestamp
+          interactions:
+            description: Customer interactions across all channels
+            columns:
+            - name: interaction_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique identifier for each customer interaction
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Reference to customer who had the interaction
+              foreign_key:
+                table: customer_db.public.customer_profiles
+                column: customer_id
+            - name: interaction_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: call, email, chat, branch_visit, complaint'
+              sample_values:
+              - support
+              - inquiry
+              - support
+              - inquiry
+            - name: channel
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Channel used: phone, email, web, mobile_app, branch'
+              sample_values:
+              - web
+              - email
+              - email
+              - phone
+            - name: interaction_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When the interaction occurred
+            - name: duration_minutes
+              type: INTEGER
+              nullable: true
+              description: Length of interaction in minutes
+            - name: notes
+              type: TEXT
+              nullable: true
+              description: Detailed notes about the interaction
+            - name: handled_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID who handled the interaction
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to customer service employee who handled the interaction
+            - name: outcome
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Result: resolved, escalated, follow_up_needed'
+              sample_values:
+              - resolved
+              - resolved
+              - resolved
+              - resolved
+          satisfaction_surveys:
+            description: Customer satisfaction and NPS survey responses
+            columns:
+            - name: survey_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing survey identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer who completed the survey
+              foreign_key:
+                table: customer_db.public.customer_profiles
+                column: customer_id
+            - name: interaction_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Related interaction if survey is interaction-specific
+              foreign_key:
+                table: customer_db.public.interactions
+                column: interaction_id
+            - name: nps_score
+              type: INTEGER
+              nullable: true
+              description: 'Net Promoter Score: 0-10 scale'
+            - name: satisfaction_rating
+              type: INTEGER
+              nullable: true
+              description: 'Overall satisfaction: 1-5 stars'
+              sample_values:
+              - '4'
+              - '4'
+              - '4'
+              - '1'
+            - name: survey_date
+              type: DATE
+              nullable: false
+              description: Date survey was completed
+            - name: comments
+              type: TEXT
+              nullable: true
+              description: Free-text customer feedback

@@ -1,0 +1,286 @@
+
+databases:
+  compliance_db:
+    schemas:
+      public:
+        tables:
+          aml_checks:
+            description: Anti-Money Laundering screening checks
+            columns:
+            - name: check_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique AML check identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Customer being screened
+            - name: transaction_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Transaction being screened if applicable
+            - name: check_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When check was performed
+            - name: check_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: watchlist, sanctions, pep_screening, transaction_monitoring'
+            - name: aml_flag
+              type: BOOLEAN
+              nullable: true
+              description: Whether check raised a concern
+            - name: risk_level
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Risk level identified: low, medium, high'
+            - name: screening_result
+              type: TEXT
+              nullable: true
+              description: Detailed results of the screening
+            - name: reviewed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Compliance officer who reviewed results
+          audit_trails:
+            description: System audit log for all critical actions
+            columns:
+            - name: audit_id
+              type: BIGINT
+              nullable: false
+              description: Auto-incrementing audit record identifier
+            - name: entity_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type of entity: account, customer, loan, transaction'
+            - name: entity_id
+              type: VARCHAR(50)
+              nullable: false
+              description: ID of the entity being audited
+            - name: action
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Action performed: create, update, delete, view'
+            - name: performed_by
+              type: VARCHAR(50)
+              nullable: false
+              description: Employee who performed the action
+            - name: performed_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Timestamp of the action
+            - name: old_value
+              type: TEXT
+              nullable: true
+              description: Previous value before change
+            - name: new_value
+              type: TEXT
+              nullable: true
+              description: New value after change
+            - name: ip_address
+              type: VARCHAR(45)
+              nullable: true
+              description: IP address from which action was performed
+          compliance_rules:
+            description: Automated compliance rules and thresholds
+            columns:
+            - name: rule_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique compliance rule identifier
+            - name: rule_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Descriptive name of the rule
+            - name: rule_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: transaction_limit, velocity_check, geographic_restriction'
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Detailed description of the rule
+            - name: threshold_value
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Numeric threshold that triggers the rule
+            - name: is_active
+              type: BOOLEAN
+              nullable: true
+              description: Whether rule is currently enforced
+            - name: created_date
+              type: DATE
+              nullable: false
+              description: Date rule was created
+          kyc_records:
+            description: Know Your Customer verification records
+            columns:
+            - name: kyc_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique KYC record identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer being verified
+            - name: verification_date
+              type: DATE
+              nullable: false
+              description: Date verification was completed
+            - name: kyc_status
+              type: VARCHAR(20)
+              nullable: false
+              description: 'Status: verified, pending, expired, rejected'
+            - name: document_type
+              type: VARCHAR(100)
+              nullable: true
+              description: 'Type of ID document: passport, drivers_license, national_id'
+            - name: document_number
+              type: VARCHAR(100)
+              nullable: true
+              description: Identification document number
+            - name: expiry_date
+              type: DATE
+              nullable: true
+              description: Document expiration date
+            - name: verified_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who verified the documents
+            - name: next_review_date
+              type: DATE
+              nullable: true
+              description: Date when KYC needs to be refreshed
+            - name: risk_rating
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Customer risk level: low, medium, high'
+          regulatory_reports:
+            description: Regulatory compliance reports submitted to authorities
+            columns:
+            - name: report_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique regulatory report identifier
+            - name: report_type
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Type: capital_adequacy, liquidity, stress_test, quarterly_filing'
+            - name: reporting_period_start
+              type: DATE
+              nullable: false
+              description: Start of reporting period
+            - name: reporting_period_end
+              type: DATE
+              nullable: false
+              description: End of reporting period
+            - name: submission_date
+              type: DATE
+              nullable: true
+              description: Date submitted to regulator
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: pending, submitted, accepted, rejected'
+            - name: prepared_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who prepared the report
+            - name: approved_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Senior officer who approved submission
+          rule_violations:
+            description: Compliance rule violations and their resolution
+            columns:
+            - name: violation_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique violation identifier
+            - name: rule_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Rule that was violated
+              foreign_key:
+                table: compliance_db.public.compliance_rules
+                column: rule_id
+            - name: entity_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type of entity that violated: transaction, account, customer'
+            - name: entity_id
+              type: VARCHAR(50)
+              nullable: false
+              description: ID of the entity that violated
+            - name: violation_date
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: When violation occurred
+            - name: severity
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Severity: low, medium, high, critical'
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: open, investigating, resolved, false_positive'
+            - name: resolution_notes
+              type: TEXT
+              nullable: true
+              description: Notes about how violation was resolved
+            - name: resolved_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who resolved the violation
+            - name: resolved_date
+              type: DATE
+              nullable: true
+              description: Date violation was resolved
+          suspicious_activity_reports:
+            description: Suspicious Activity Reports filed with regulators
+            columns:
+            - name: sar_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique SAR identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Customer involved in suspicious activity
+            - name: account_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Account involved if applicable
+            - name: report_date
+              type: DATE
+              nullable: false
+              description: Date SAR was created
+            - name: activity_type
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Type: structuring, unusual_pattern, high_risk_country'
+            - name: description
+              type: TEXT
+              nullable: false
+              description: Detailed description of suspicious activity
+            - name: sar_status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: draft, filed, under_review, closed'
+            - name: filed_date
+              type: DATE
+              nullable: true
+              description: Date filed with regulator
+            - name: regulatory_tier
+              type: VARCHAR(20)
+              nullable: true
+              description: Classification tier for regulatory purposes
+            - name: filed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Compliance officer who filed the SAR
+            - name: amount_involved
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Total monetary amount involved

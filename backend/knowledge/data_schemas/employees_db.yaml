@@ -1,0 +1,269 @@
+
+databases:
+  employees_db:
+    schemas:
+      public:
+        tables:
+          departments:
+            description: Organizational departments within the bank
+            columns:
+            - name: department_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique department identifier
+            - name: department_name
+              type: VARCHAR(100)
+              nullable: false
+              description: Official department name
+            - name: department_head_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID of department head
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: budget
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Annual department budget
+          employee_assignments:
+            description: Employee assignments to customers, projects, or branches
+            columns:
+            - name: assignment_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing assignment identifier
+            - name: employee_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Employee assigned
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: assignment_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: customer_portfolio, project, branch_coverage'
+              sample_values:
+              - customer_portfolio
+              - customer_portfolio
+              - customer_portfolio
+              - customer_portfolio
+            - name: related_entity_id
+              type: VARCHAR(50)
+              nullable: true
+              description: ID of related entity (customer, project, branch)
+            - name: start_date
+              type: DATE
+              nullable: false
+              description: Assignment start date
+            - name: end_date
+              type: DATE
+              nullable: true
+              description: Assignment end date, NULL if ongoing
+          employee_training:
+            description: Employee enrollment and completion in training programs
+            columns:
+            - name: training_record_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing training record identifier
+            - name: employee_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Employee enrolled in training
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: program_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Training program enrolled in
+              foreign_key:
+                table: employees_db.public.training_programs
+                column: program_id
+            - name: enrollment_date
+              type: DATE
+              nullable: true
+              description: Date employee enrolled
+            - name: completion_date
+              type: DATE
+              nullable: true
+              description: Date employee completed training
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: enrolled, in_progress, completed, dropped'
+              sample_values:
+              - completed
+              - in_progress
+              - completed
+              - completed
+            - name: score
+              type: INTEGER
+              nullable: true
+              description: Final score or grade if applicable
+          employees:
+            description: Bank employee records and employment details
+            columns:
+            - name: employee_id
+              type: VARCHAR(50)
+              nullable: false
+              description: System-generated unique employee identifier
+            - name: employee_number
+              type: VARCHAR(20)
+              nullable: false
+              description: Human-readable employee number
+            - name: first_name
+              type: VARCHAR(100)
+              nullable: false
+              description: Employee first name
+            - name: last_name
+              type: VARCHAR(100)
+              nullable: false
+              description: Employee last name
+            - name: email
+              type: VARCHAR(150)
+              nullable: true
+              description: Corporate email address
+            - name: phone
+              type: VARCHAR(20)
+              nullable: true
+              description: Work phone number
+            - name: role
+              type: VARCHAR(100)
+              nullable: false
+              description: Job title or position
+              sample_values:
+              - IT Specialist
+              - Insurance Agent
+              - Branch Manager
+              - Customer Service Representative
+            - name: department
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Department name: lending, operations, risk, customer_service'
+              sample_values:
+              - Information Technology
+              - Insurance
+              - Retail Banking
+              - Customer Service
+            - name: branch_code
+              type: VARCHAR(10)
+              nullable: true
+              description: Branch location code where employee works
+            - name: manager_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee ID of direct manager
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: hire_date
+              type: DATE
+              nullable: false
+              description: Date employee was hired
+            - name: termination_date
+              type: DATE
+              nullable: true
+              description: Date employment ended, NULL if currently employed
+              sample_values:
+              - '2023-10-12'
+              - '2022-04-25'
+            - name: employment_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Status: active, on_leave, terminated'
+              sample_values:
+              - active
+              - active
+              - active
+              - active
+            - name: salary
+              type: NUMERIC(12, 2)
+              nullable: true
+              description: Annual salary amount
+            - name: created_at
+              type: TIMESTAMP WITHOUT TIME ZONE
+              nullable: true
+              description: Record creation timestamp
+              sample_values:
+              - '2025-10-26 11:10:31.175110'
+              - '2025-10-26 11:10:31.175110'
+              - '2025-10-26 11:10:31.175110'
+              - '2025-10-26 11:10:31.175110'
+          performance_reviews:
+            description: Employee performance evaluation records
+            columns:
+            - name: review_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing review identifier
+            - name: employee_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Employee being reviewed
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: review_date
+              type: DATE
+              nullable: false
+              description: Date of the performance review
+            - name: reviewer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Employee ID of the reviewer, typically manager
+              foreign_key:
+                table: employees_db.public.employees
+                column: employee_id
+            - name: rating
+              type: INTEGER
+              nullable: true
+              description: 'Overall performance rating: 1-5 scale'
+              sample_values:
+              - '3'
+              - '4'
+              - '5'
+              - '4'
+            - name: goals_met
+              type: INTEGER
+              nullable: true
+              description: Number or percentage of goals achieved
+            - name: comments
+              type: TEXT
+              nullable: true
+              description: Detailed review comments
+          training_programs:
+            description: Available training and certification programs
+            columns:
+            - name: program_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique training program identifier
+            - name: program_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Name of the training program
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Detailed description of program content
+            - name: duration_hours
+              type: INTEGER
+              nullable: true
+              description: Total program duration in hours
+              sample_values:
+              - '40'
+              - '4'
+              - '24'
+              - '40'
+            - name: certification
+              type: BOOLEAN
+              nullable: true
+              description: Whether program awards certification upon completion
+              sample_values:
+              - 'False'
+              - 'False'
+              - 'False'
+              - 'False'

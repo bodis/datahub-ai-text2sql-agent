@@ -1,0 +1,42 @@
+data_sources:
+  - id: customer_db
+    name: Customer DB
+    short_description: Customer relationships and interactions
+    description: Customer relationship management, interactions, complaints, marketing campaigns, and satisfaction surveys
+    icon: users
+    datasource: demo_bank
+
+  - id: accounts_db
+    name: Accounts DB
+    short_description: Banking accounts and transactions
+    description: Bank accounts, transactions, customer master data, and account relationships
+    icon: wallet
+    datasource: demo_bank
+
+  - id: loans_db
+    name: Loans DB
+    short_description: Lending and credit management
+    description: Loan applications, active loans, repayments, collateral, and credit risk assessments
+    icon: credit-card
+    datasource: demo_bank
+
+  - id: insurance_db
+    name: Insurance DB
+    short_description: Insurance policies and claims
+    description: Insurance policies, claims, beneficiaries, and coverage details
+    icon: shield
+    datasource: demo_bank
+
+  - id: compliance_db
+    name: Compliance DB
+    short_description: Regulatory and audit tracking
+    description: AML screening, audit trails, compliance rules, and regulatory reporting
+    icon: file-check
+    datasource: demo_bank
+
+  - id: employees_db
+    name: Employees DB
+    short_description: HR and organization data
+    description: Employee information, departments, assignments, and training programs
+    icon: briefcase
+    datasource: demo_bank

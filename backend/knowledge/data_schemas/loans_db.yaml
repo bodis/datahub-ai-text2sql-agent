@@ -1,0 +1,333 @@
+
+databases:
+  loans_db:
+    schemas:
+      public:
+        tables:
+          collateral:
+            description: Assets pledged as security for loans
+            columns:
+            - name: collateral_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique collateral identifier
+            - name: loan_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Loan secured by this collateral
+              foreign_key:
+                table: loans_db.public.loans
+                column: loan_id
+            - name: collateral_type
+              type: VARCHAR(100)
+              nullable: false
+              description: 'Type: property, vehicle, equipment, securities'
+              sample_values:
+              - property
+              - property
+              - vehicle
+              - vehicle
+            - name: description
+              type: TEXT
+              nullable: true
+              description: Detailed description of the collateral
+            - name: appraised_value
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Professional appraisal value
+            - name: appraisal_date
+              type: DATE
+              nullable: true
+              description: Date of last appraisal
+            - name: ltv_ratio
+              type: NUMERIC(5, 4)
+              nullable: true
+              description: Loan-to-Value ratio as decimal
+          loan_applications:
+            description: Loan applications submitted by customers
+            columns:
+            - name: application_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Unique loan application identifier
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer applying for the loan
+              cross_db_reference:
+                table: accounts_db.public.customers
+                column: customer_id
+                description: Links loan application to customer master record in accounts
+                  database
+            - name: loan_type
+              type: VARCHAR(50)
+              nullable: false
+              description: 'Type: mortgage, personal, auto, business, education'
+              sample_values:
+              - auto
+              - mortgage
+              - personal
+              - auto
+            - name: requested_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Amount customer requested to borrow
+            - name: application_date
+              type: DATE
+              nullable: false
+              description: Date application was submitted
+            - name: status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: pending, approved, rejected, withdrawn'
+              sample_values:
+              - approved
+              - rejected
+              - approved
+              - approved
+            - name: officer_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Loan officer handling the application
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to loan officer employee record
+            - name: decision_date
+              type: DATE
+              nullable: true
+              description: Date final decision was made
+            - name: approved_amount
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Amount approved, may differ from requested
+            - name: rejection_reason
+              type: TEXT
+              nullable: true
+              description: Reason for rejection if applicable
+              sample_values:
+              - Insufficient collateral value
+              - Unstable employment history
+              - Insufficient collateral value
+              - Insufficient collateral value
+          loan_guarantors:
+            description: Third-party guarantors for loans
+            columns:
+            - name: guarantor_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing guarantor identifier
+            - name: loan_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Loan being guaranteed
+              foreign_key:
+                table: loans_db.public.loans
+                column: loan_id
+            - name: guarantor_name
+              type: VARCHAR(200)
+              nullable: false
+              description: Full name of guarantor
+            - name: relationship
+              type: VARCHAR(50)
+              nullable: true
+              description: Relationship to borrower
+              sample_values:
+              - family_member
+              - business_partner
+              - business_partner
+              - spouse
+            - name: contact_info
+              type: TEXT
+              nullable: true
+              description: Guarantor contact information
+            - name: guarantee_amount
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Amount guaranteed by this guarantor
+          loans:
+            description: Active and historical loan accounts
+            columns:
+            - name: loan_id
+              type: VARCHAR(50)
+              nullable: false
+              description: System-generated unique loan identifier
+            - name: application_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Original application that led to this loan
+              foreign_key:
+                table: loans_db.public.loan_applications
+                column: application_id
+            - name: loan_number
+              type: VARCHAR(30)
+              nullable: false
+              description: Customer-facing loan account number
+            - name: customer_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Customer who received the loan
+              cross_db_reference:
+                table: accounts_db.public.customers
+                column: customer_id
+                description: Links loan to customer master record in accounts database
+            - name: linked_account_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Bank account for disbursement and repayment
+              cross_db_reference:
+                table: accounts_db.public.accounts
+                column: account_id
+                description: Links to bank account used for loan disbursement and
+                  repayments
+            - name: loan_type
+              type: VARCHAR(50)
+              nullable: false
+              description: Type of loan product
+              sample_values:
+              - personal
+              - personal
+              - education
+              - mortgage
+            - name: principal_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Original loan amount disbursed
+            - name: interest_rate
+              type: NUMERIC(5, 4)
+              nullable: false
+              description: Annual interest rate as decimal (e.g., 0.0525 for 5.25%)
+            - name: term_months
+              type: INTEGER
+              nullable: false
+              description: Loan term length in months
+            - name: disbursement_date
+              type: DATE
+              nullable: false
+              description: Date loan funds were disbursed
+            - name: maturity_date
+              type: DATE
+              nullable: false
+              description: Final payment due date
+            - name: loan_status
+              type: VARCHAR(50)
+              nullable: true
+              description: 'Status: active, paid_off, defaulted, restructured'
+              sample_values:
+              - active
+              - active
+              - active
+              - active
+            - name: outstanding_balance
+              type: NUMERIC(15, 2)
+              nullable: true
+              description: Current remaining balance to be paid
+            - name: default_status
+              type: BOOLEAN
+              nullable: true
+              description: Whether loan is currently in default
+              sample_values:
+              - 'False'
+              - 'False'
+              - 'False'
+              - 'False'
+            - name: approved_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee who approved the loan
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to approving officer employee record
+          repayment_schedule:
+            description: Scheduled loan repayment installments
+            columns:
+            - name: schedule_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing schedule entry identifier
+            - name: loan_id
+              type: VARCHAR(50)
+              nullable: false
+              description: Loan this schedule belongs to
+              foreign_key:
+                table: loans_db.public.loans
+                column: loan_id
+            - name: installment_number
+              type: INTEGER
+              nullable: false
+              description: Sequential installment number
+            - name: due_date
+              type: DATE
+              nullable: false
+              description: Payment due date
+            - name: principal_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Principal portion of payment
+            - name: interest_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Interest portion of payment
+            - name: total_amount
+              type: NUMERIC(15, 2)
+              nullable: false
+              description: Total payment amount due
+            - name: payment_date
+              type: DATE
+              nullable: true
+              description: Actual date payment was received
+            - name: payment_status
+              type: VARCHAR(20)
+              nullable: true
+              description: 'Status: pending, paid, late, missed'
+              sample_values:
+              - paid
+              - paid
+              - late
+              - paid
+          risk_assessments:
+            description: Credit risk assessments for loans and applications
+            columns:
+            - name: assessment_id
+              type: INTEGER
+              nullable: false
+              description: Auto-incrementing assessment identifier
+            - name: loan_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Loan being assessed, NULL for applications
+            - name: application_id
+              type: VARCHAR(50)
+              nullable: true
+              description: Application being assessed, NULL for existing loans
+            - name: assessment_date
+              type: DATE
+              nullable: false
+              description: Date assessment was performed
+            - name: risk_score
+              type: INTEGER
+              nullable: true
+              description: 'Credit risk score: 0-1000 scale'
+            - name: pd_probability
+              type: NUMERIC(5, 4)
+              nullable: true
+              description: Probability of Default as decimal
+            - name: credit_grade
+              type: VARCHAR(10)
+              nullable: true
+              description: 'Letter grade: AAA, AA, A, BBB, BB, B, CCC, etc.'
+              sample_values:
+              - AA
+              - BB
+              - AAA
+              - A
+            - name: assessed_by
+              type: VARCHAR(50)
+              nullable: true
+              description: Employee or system that performed assessment
+              cross_db_reference:
+                table: employees_db.public.employees
+                column: employee_id
+                description: Links to risk assessment officer employee record
+
